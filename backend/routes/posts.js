@@ -5,8 +5,8 @@ const { getAllPosts, createPost, getPostById, applyToPost } = require('../contro
 
 // Get all posts
 router.get('/', authenticate, getAllPosts);
-// Create a post (company or college only)
-router.post('/', authenticate, authorizeRoles('company', 'college'), createPost);
+// Create a post (company, college, or admin only)
+router.post('/', authenticate, authorizeRoles('company', 'college', 'admin'), createPost);
 // Get a single post by ID
 router.get('/:id', authenticate, getPostById);
 // Apply to a post (student only)
