@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 exports.getMyApplications = (req, res) => {
   const user_id = req.user.id;
-  const sql = `SELECT a.id as application_id, a.status, a.applied_at, p.*
+  const sql = `SELECT a.id as application_id, a.status as application_status, a.applied_at, p.*
                FROM applications a
                JOIN posts p ON a.post_id = p.id
                WHERE a.user_id = ?`;
@@ -43,6 +43,29 @@ exports.updateApplicationStatus = (req, res) => {
     if (err) return res.status(500).json({ message: 'Database error', error: err });
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Not found or not authorized' });
     res.json({ message: `Application status updated to ${status}` });
+  });
+};
+
+exports.updateApplicationByAdmin = (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (status && !['applied', 'accepted', 'rejected'].includes(status)) {
+    return res.status(400).json({ message: 'Invalid status' });
+  }
+  const fields = [];
+  const params = [];
+  if (status) {
+    fields.push('status = ?');
+    params.push(status);
+  }
+  if (fields.length === 0) {
+    return res.status(400).json({ message: 'No valid fields to update' });
+  }
+  params.push(id);
+  const sql = `UPDATE applications SET ${fields.join(', ')} WHERE id = ?`;
+  db.query(sql, params, (err, result) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err });
+    res.json({ message: 'Application updated' });
   });
 };
 

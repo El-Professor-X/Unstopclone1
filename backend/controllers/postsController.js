@@ -2,10 +2,10 @@ const db = require('../config/db');
 
 exports.getAllPosts = (req, res) => {
   const search = req.query.search;
-  let sql = 'SELECT * FROM posts';
+  let sql = `SELECT p.*, u.name as organizer_name, u.role as organizer_role FROM posts p JOIN users u ON p.organizer_id = u.id`;
   let params = [];
   if (search) {
-    sql += ' WHERE title LIKE ? OR description LIKE ?';
+    sql += ' WHERE p.title LIKE ? OR p.description LIKE ?';
     params = [`%${search}%`, `%${search}%`];
   }
   db.query(sql, params, (err, results) => {
